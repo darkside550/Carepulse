@@ -12,9 +12,10 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
 import { FormFieldType } from "../forms/PatientForm";
+import DatePicker from "react-datepicker";
 import "react-phone-number-input/style.css";
+import "react-datepicker/dist/react-datepicker.css";
 import PhoneInput from "react-phone-number-input";
-import { Label } from "@radix-ui/react-label";
 import { E164Number } from "libphonenumber-js";
 
 interface CustomProps {
@@ -33,7 +34,8 @@ interface CustomProps {
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
-  const { fieldType, iconSrc, iconAlt, placeholder } = props;
+  const { fieldType, iconSrc, iconAlt, placeholder, showTimeSelect, dateFormat, renderSkeleton } =
+    props;
 
   switch (fieldType) {
     case FormFieldType.INPUT:
@@ -64,6 +66,32 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         </FormControl>
       );
 
+    case FormFieldType.DATE_PICKER:
+      return (
+        <div className='flex rounded-md border border-dark-500 bg-dark-400'>
+          <Image
+            src='/assets/icons/calendar.svg'
+            alt='calender'
+            width={24}
+            height={24}
+            className='ml-2'
+          />
+          <FormControl>
+            <DatePicker
+              selected={field.value}
+              onChange={(date) => field.onChange(date)}
+              showTimeSelect={showTimeSelect ?? false}
+              dateFormat={dateFormat ?? "MM/dd/yyyy"}
+              timeInputLabel='Time:'
+              wrapperClassName='date-picker'
+            />
+          </FormControl>
+        </div>
+      );
+
+    case FormFieldType.SKELETON:
+      return renderSkeleton ? renderSkeleton(field) : null;
+
     default:
       break;
   }
@@ -77,7 +105,9 @@ const CustomFormField = (props: CustomProps) => {
       name={name}
       render={({ field }) => (
         <FormItem className='flex-1'>
-          {fieldType !== FormFieldType.CHECKBOX && label && <FormLabel>{label}</FormLabel>}
+          {fieldType !== FormFieldType.CHECKBOX && label && (
+            <FormLabel className='shad-input-label'>{label}</FormLabel>
+          )}
 
           <RenderField field={field} props={props} />
           <FormMessage className='shad-error' />
